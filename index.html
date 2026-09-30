@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Girl</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0d0d12;color:#f5f5f7;font-family:Arial,Tahoma,sans-serif}
+button,input,textarea,select{font:inherit}.app{height:100vh;display:grid;grid-template-columns:340px 1fr}.side{background:#15151d;border-left:1px solid #292933;padding:16px;overflow:auto}.sec{background:#1d1d28;border:1px solid #30303b;border-radius:18px;padding:14px;margin-bottom:12px}.sec h3{margin:0 0 12px}.input{width:100%;padding:12px;border-radius:12px;border:1px solid #33333e;background:#101017;color:#fff;outline:0;margin:4px 0 9px}.btn{border:0;border-radius:12px;padding:11px 15px;background:linear-gradient(135deg,#ff5fa3,#9c5cff);color:#fff;font-weight:bold;cursor:pointer}.full{width:100%}.person{background:#111119;border-radius:11px;padding:9px;margin-top:7px;font-size:12px}.person button{float:left;background:none;border:0;color:#ff7188}.emo{display:grid;grid-template-columns:1fr 1fr;gap:7px}.emo div{background:#111119;padding:7px;border-radius:10px;font-size:11px}.emo img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:7px;display:none;margin-top:5px}.chat{height:100vh;position:relative;display:flex;flex-direction:column;overflow:hidden;background:#101017}.bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:.5s;z-index:0}.bg:after{content:"";position:absolute;inset:0;background:rgba(10,10,15,.5)}.head,.msgs,.composer{position:relative;z-index:2}.head{height:68px;padding:10px 16px;background:#0d0d12cc;backdrop-filter:blur(15px);border-bottom:1px solid #292933;display:flex;align-items:center;gap:10px}.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#ff5fa3,#9c5cff);font-size:22px}.status{font-size:11px;color:#75e19a}.msgs{flex:1;overflow:auto;padding:20px}.msg{display:flex;margin:0 0 13px}.msg.user{justify-content:flex-start}.msg.ai{justify-content:flex-end}.bubble{max-width:82%;padding:12px 15px;border-radius:18px;line-height:1.7;white-space:pre-wrap}.user .bubble{background:linear-gradient(135deg,#ff5fa3,#b45cff);border-bottom-left-radius:5px}.ai .bubble{background:#22222dcc;border:1px solid #ffffff12;backdrop-filter:blur(10px);border-bottom-right-radius:5px}.composer{padding:10px;background:#0d0d12d9;border-top:1px solid #292933}.row{display:flex;gap:7px}.icon{width:48px;border:0;border-radius:12px;background:#20202a;color:#fff;cursor:pointer}.send{background:linear-gradient(135deg,#ff5fa3,#9c5cff)}#api{position:fixed;inset:0;z-index:20;background:#0b0b10;display:grid;place-items:center;padding:20px}.card{width:min(480px,100%);background:#181821;border:1px solid #30303b;border-radius:25px;padding:28px;text-align:center}.card .logo{font-size:45px}.menu{display:none;position:fixed;z-index:10;top:12px;right:12px;background:#222;color:white;border:1px solid #444;border-radius:10px;padding:10px}@media(max-width:850px){.app{display:block}.side{position:fixed;right:-100%;top:0;width:min(350px,92%);height:100vh;z-index:9;transition:.3s}.side.open{right:0}.menu{display:block}.bubble{max-width:90%}}
+</style>
+</head>
+<body>
+
+<div id="api">
+<div class="card">
+<div class="logo">💗</div>
+<h1>AI Girl</h1>
+<p>ضعي مفتاح OpenRouter ثم فعّلي الشخصية.</p>
+<input id="key" class="input" type="password" placeholder="sk-or-v1-...">
+<button class="btn full" onclick="activate()">تفعيل AI Girl</button>
+<p style="font-size:11px;color:#888">المفتاح يُحفظ محلياً على هذا الجهاز فقط.</p>
+</div>
+</div>
+
+<div id="app" style="display:none">
+<button class="menu" onclick="document.querySelector('.side').classList.toggle('open')">☰</button>
+<div class="app">
+<aside class="side">
+<h2>⚙️ إعدادات AI Girl</h2>
+
+<div class="sec">
+<h3>👩 الشخصية</h3>
+<label>الاسم</label><input id="name" class="input" value="Luna">
+<label>العمر</label><input id="age" class="input" value="19">
+<label>الشخصية</label><textarea id="personality" class="input" placeholder="لطيفة، مرحة، صريحة..."></textarea>
+<label>تحب</label><textarea id="likes" class="input"></textarea>
+<label>لا تحب</label><textarea id="dislikes" class="input"></textarea>
+<label>اللهجة</label>
+<select id="dialect" class="input"><option value="iraqi">عراقي</option><option value="arabic">عربي</option><option value="english">English</option></select>
+<button class="btn full" onclick="savePersonality()">حفظ الشخصية</button>
+</div>
+
+<div class="sec">
+<h3>🗣️ أسلوب الكلام</h3>
+<select id="style" class="input" onchange="customBox()">
+<option value="iraqi_casual">عراقي عفوي</option>
+<option value="iraqi_soft">عراقي هادئ ولطيف</option>
+<option value="iraqi_funny">عراقي مضحك</option>
+<option value="iraqi_youth">عراقي شبابي</option>
+<option value="calm">هادئ</option>
+<option value="short">مختصر</option>
+<option value="talkative">حچي كثير</option>
+<option value="formal">رسمي</option>
+<option value="custom">مخصص</option>
+</select>
+<div id="custom" style="display:none"><textarea id="customStyle" class="input" placeholder="اكتبي بالضبط شلون تريدينها تحچي..."></textarea></div>
+<button class="btn full" onclick="saveStyle()">حفظ أسلوب الكلام</button>
+</div>
+
+<div class="sec">
+<h3>👥 الأشخاص</h3>
+<input id="pn" class="input" placeholder="الاسم">
+<input id="pr" class="input" placeholder="العلاقة">
+<textarea id="pi" class="input" placeholder="معلومات عنه"></textarea>
+<button class="btn full" onclick="addPerson()">+ إضافة شخص</button>
+<div id="people"></div>
+</div>
+
+<div class="sec">
+<h3>🎭 صور المشاعر</h3>
+<p style="font-size:11px;color:#999">الصورة المختارة تصبح خلفية للمحادثة عند ظهور الشعور.</p>
+<div class="emo" id="emos"></div>
+<button class="btn full" style="margin-top:9px" onclick="saveEmotions()">💾 حفظ الصور</button>
+</div>
+
+<div class="sec">
+<button class="btn full" onclick="clearMemory()" style="background:#40212c">🗑️ مسح ذاكرة المحادثة</button>
+<button class="btn full" onclick="changeKey()" style="margin-top:7px">تغيير API Key</button>
+</div>
+</aside>
+
+<main class="chat">
+<div id="bg" class="bg"></div>
+<header class="head"><div class="avatar">💗</div><div><b id="headName">Luna</b><div class="status">● AI Online</div></div></header>
+<div id="msgs" class="msgs"></div>
+<div id="typing" style="display:none;position:relative;z-index:2;padding:7px 15px;color:#aaa">AI Girl تكتب...</div>
+<div class="composer">
+<div id="picked" style="display:none;color:#aaa;font-size:12px;padding:5px"></div>
+<div class="row">
+<input id="image" type="file" accept="image/*" hidden onchange="pickImage(event)">
+<button class="icon" onclick="image.click()">📷</button>
+<textarea id="text" class="input" style="margin:0;resize:none" placeholder="اكتبي شيء..." onkeydown="enterSend(event)"></textarea>
+<button class="icon send" onclick="send()">➤</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+<script>
+const emotions=["neutral","happy","laugh","sad","angry","shy","surprised","confused","thinking","love","sleepy","excited"];
+const labels={neutral:"😐 محايد",happy:"😊 فرح",laugh:"😂 ضحك",sad:"😢 حزن",angry:"😡 غضب",shy:"😳 خجل",surprised:"😲 مفاجأة",confused:"😕 حيرة",thinking:"🤔 تفكير",love:"❤️ حب",sleepy:"😴 نعاس",excited:"🤩 حماس"};
+let key=localStorage.aiGirlKey||"", people=JSON.parse(localStorage.aiGirlPeople||"[]"), history=JSON.parse(localStorage.aiGirlHistory||"[]"), imgs=JSON.parse(localStorage.aiGirlImages||"{}"), selected=null;
+
+const $=id=>document.getElementById(id);
+function activate(){let k=$("key").value.trim();if(!k)return alert("حطي المفتاح أولاً");key=k;localStorage.aiGirlKey=k;show()}
+function show(){$("api").style.display="none";$("app").style.display="block"}
+function changeKey(){localStorage.removeItem("aiGirlKey");location.reload()}
+if(key)show();
+
+function savePersonality(){
+ let p={name:$("name").value,age:$("age").value,personality:$("personality").value,likes:$("likes").value,dislikes:$("dislikes").value,dialect:$("dialect").value};
+ localStorage.aiGirlPersonality=JSON.stringify(p);$("headName").textContent=p.name||"Luna";alert("تم حفظ الشخصية 💗")
+}
+function loadPersonality(){
+ let p=JSON.parse(localStorage.aiGirlPersonality||"{}");
+ ["name","age","personality","likes","dislikes","dialect"].forEach(x=>{if(p[x]!=null)$(x).value=p[x]});
+ $("headName").textContent=p.name||"Luna"
+}
+function customBox(){$("custom").style.display=$("style").value==="custom"?"block":"none"}
+function saveStyle(){localStorage.aiGirlStyle=JSON.stringify({style:$("style").value,custom:$("customStyle").value});alert("تم حفظ أسلوب الكلام 🗣️")}
+function loadStyle(){let x=JSON.parse(localStorage.aiGirlStyle||"{}");if(x.style)$("style").value=x.style;if(x.custom)$("customStyle").value=x.custom;customBox()}
+
+function addPerson(){
+ let n=$("pn").value.trim();if(!n)return alert("اكتبي الاسم");
+ people.push({id:Date.now(),name:n,relation:$("pr").value,info:$("pi").value});
+ localStorage.aiGirlPeople=JSON.stringify(people);$("pn").value=$("pr").value=$("pi").value="";renderPeople()
+}
+function delPerson(id){people=people.filter(x=>x.id!==id);localStorage.aiGirlPeople=JSON.stringify(people);renderPeople()}
+function renderPeople(){$("people").innerHTML=people.map(p=>`<div class="person"><button onclick="delPerson(${p.id})">حذف</button><b>${esc(p.name)}</b><br>${esc(p.relation)}<br>${esc(p.info)}</div>`).join("")||'<small style="color:#777">ماكو أشخاص مضافين.</small>'}
+
+function buildEmotionUI(){
+ $("emos").innerHTML=emotions.map(e=>`<div><b>${labels[e]}</b><input type="file" accept="image/*" data-e="${e}" onchange="preview(this)"><img id="im-${e}"></div>`).join("");
+}
+function preview(input){
+ let f=input.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{let im=$("im-"+input.dataset.e);im.src=r.result;im.style.display="block"};r.readAsDataURL(f)
+}
+function compress(file){
+ return new Promise((resolve,reject)=>{let r=new FileReader();r.onload=e=>{let im=new Image();im.onload=()=>{let m=1200,w=im.width,h=im.height;if(Math.max(w,h)>m){let q=m/Math.max(w,h);w*=q;h*=q}let c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);resolve(c.toDataURL("image/jpeg",.75))};im.onerror=reject;im.src=e.target.result};r.onerror=reject;r.readAsDataURL(file)})
+}
+async function saveEmotions(){
+ for(let x of document.querySelectorAll("[data-e]"))if(x.files[0])imgs[x.dataset.e]=await compress(x.files[0]);
+ try{localStorage.aiGirlImages=JSON.stringify(imgs);alert("تم حفظ صور المشاعر 💗")}catch(e){alert("الصور كبيرة جداً، جربي صور أصغر")}
+}
+function loadEmotions(){for(let e of emotions)if(imgs[e]){let im=$("im-"+e);if(im){im.src=imgs[e];im.style.display="block"}}}
+function background(e){if(imgs[e]){$("bg").style.backgroundImage=`url("${imgs[e]}")`;$("bg").style.opacity=1}}
+
+function pickImage(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{selected=r.result;$("picked").style.display="block";$("picked").textContent="📷 تم اختيار الصورة: "+f.name};r.readAsDataURL(f)}
+function add(role,text,emotion){history.push({role,text,emotion});history=history.slice(-60);localStorage.aiGirlHistory=JSON.stringify(history);ui(role,text);if(role==="assistant")background(emotion)}
+function ui(role,text){let d=document.createElement("div");d.className="msg "+(role==="user"?"user":"ai");let b=document.createElement("div");b.className="bubble";b.textContent=text;d.appendChild(b);$("msgs").appendChild(d);$("msgs").scrollTop=$("msgs").scrollHeight}
+function render(){ $("msgs").innerHTML="";history.forEach(x=>ui(x.role,x.text));}
+function clearMemory(){if(confirm("مسح ذاكرة المحادثة؟")){history=[];localStorage.removeItem("aiGirlHistory");$("msgs").innerHTML=""}}
+
+function prompt(){
+ let p=JSON.parse(localStorage.aiGirlPersonality||"{}"),s=JSON.parse(localStorage.aiGirlStyle||"{}");
+ let styles={iraqi_casual:"احچي عراقي عفوي وطبيعي.",iraqi_soft:"احچي عراقي هادئ ولطيف.",iraqi_funny:"احچي عراقي مرح ومضحك بدون مبالغة.",iraqi_youth:"احچي عراقي شبابي طبيعي.",calm:"احچي بهدوء.",short:"خلي الردود مختصرة.",talkative:"كوني حچاية وتفاعلية.",formal:"استخدمي العربية الفصحى.",custom:s.custom||"احچي بشكل طبيعي."};
+ return `أنت AI Girl، ذكاء اصطناعي ولست إنسانة حقيقية، لكن تحدثي بشكل طبيعي جداً.
+الاسم: ${p.name||"Luna"}، العمر: ${p.age||19}
+الشخصية: ${p.personality||"لطيفة ومرحة وصريحة"}
+تحب: ${p.likes||"أشياء ممتعة"} | لا تحب: ${p.dislikes||"الكذب"}
+اللهجة: ${p.dialect||"iraqi"}
+أسلوب الكلام: ${styles[s.style||"iraqi_casual"]}
+الأشخاص:
+${people.map(x=>"- "+x.name+" | "+x.relation+" | "+x.info).join("\n")||"لا يوجد"}
+كوني طبيعية، لا تدّعي امتلاك حياة بشرية، لا تختلقي معلومات، ممكن تختلفين أو تقولين ما أعرف، وممكن تمزحين أو تستغربين. لا تتكلمي مثل خدمة عملاء.
+أرجعي JSON فقط:
+{"reply":"الرد","emotion":"neutral"}
+المشاعر المسموحة: ${emotions.join(", ")}`;
+}
+function parse(x){
+ x=x.trim().replace(/^```json/i,"").replace(/^```/,"").replace(/```$/,"").trim();
+ try{let j=JSON.parse(x);return {reply:j.reply||"ما عرفت شنو أجاوب 😭",emotion:emotions.includes(j.emotion)?j.emotion:"neutral"}}catch{return {reply:x,emotion:"neutral"}}
+}
+async function ask(text,img){
+ let msgs=history.slice(-25).map(x=>({role:x.role,content:x.text}));
+ let content=img?[{type:"text",text:text||"حللي الصورة واشرحي شنو بيها."},{type:"image_url",image_url:{url:img}}]:text;
+ let r=await fetch("https://openrouter.ai/api/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json","HTTP-Referer":location.href,"X-Title":"AI Girl"},body:JSON.stringify({model:"openrouter/free",messages:[{role:"system",content:prompt()},...msgs,{role:"user",content}],temperature:.85,max_tokens:1000})});
+ let d=await r.json();if(!r.ok)throw Error(d?.error?.message||"OpenRouter error");return parse(d.choices?.[0]?.message?.content||"")
+}
+async function send(){
+ let t=$("text").value.trim();if(!t&&!selected)return;
+ let im=selected;add("user",t||"📷 أرسلت صورة");$("text").value="";selected=null;$("picked").style.display="none";$("image").value="";
+ $("typing").style.display="block";
+ try{let r=await ask(t,im);add("assistant",r.reply,r.emotion)}catch(e){add("assistant","صار خطأ بالاتصال بالـAI 😭\n"+e.message,"confused")}finally{$("typing").style.display="none"}
+}
+function enterSend(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+
+document.addEventListener("DOMContentLoaded",()=>{
+ loadPersonality();loadStyle();renderPeople();buildEmotionUI();loadEmotions();render()
+});
+</script>
+</body>
+</html>
